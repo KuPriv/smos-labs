@@ -38,9 +38,23 @@ def get_code(path, name):
 
 
 def lookup(d, dotted):
+    """Поиск по пути a.b.c; ключи с точкой (например «80.0») склеиваются жадно."""
+    parts = dotted.split(".")
     cur = d
-    for k in dotted.split("."):
-        cur = cur[int(k)] if isinstance(cur, list) else cur[k]
+    i = 0
+    while i < len(parts):
+        if isinstance(cur, list):
+            cur = cur[int(parts[i])]
+            i += 1
+            continue
+        for j in range(len(parts), i, -1):
+            key = ".".join(parts[i:j])
+            if key in cur:
+                cur = cur[key]
+                i = j
+                break
+        else:
+            raise KeyError(dotted)
     return cur
 
 
